@@ -9,23 +9,23 @@ from elevenlabs.client import ElevenLabs
 
 class VoiceConfig(BaseModel):
     """Voice configuration settings."""
-    stability: float = 0.45  # Slightly lower for more natural variation
-    similarity_boost: float = 0.85  # Higher to maintain consistent voice character
-    style: float = 0.65  # Balanced expressiveness
+    stability: float = 0.45 
+    similarity_boost: float = 0.85  
+    style: float = 0.65 
     use_speaker_boost: bool = True
     model_id: str = "eleven_multilingual_v2"
     output_format: str = "mp3_44100_128"
-    apply_text_normalization: str = "auto"  # 'auto', 'on', or 'off'
+    apply_text_normalization: str = "auto" 
 
 class AudioConfig(BaseModel):
     """Audio processing configuration."""
     format: str = "mp3"
-    sample_rate: int = 48000  # Higher for better quality
+    sample_rate: int = 48000  
     channels: int = 2
-    bitrate: str = "256k"     # Higher bitrate for clearer audio
-    normalize: bool = True    # Normalize audio levels
-    target_loudness: float = -14.0  # Standard podcast loudness (LUFS)
-    compression_ratio: float = 2.0   # Light compression for voice
+    bitrate: str = "256k"    
+    normalize: bool = True    
+    target_loudness: float = -14.0  
+    compression_ratio: float = 2.0   
 
 class Dialogue(BaseModel):
     """Dialogue for the podcast audio generation tool."""
@@ -96,20 +96,20 @@ class PodcastAudioGenerator(BaseTool):
                     }
                 )
 
-                # Convert generator to bytes
+               
                 audio_bytes = b''.join(chunk for chunk in audio_generator)
 
                 filename = f"{self.output_dir}/{index:03d}_{speaker}.{self.audio_config.format}"
                 with open(filename, "wb") as out:
                     out.write(audio_bytes)
 
-                # Basic audio normalization
+            
                 if self.audio_config.normalize:
                     audio = AudioSegment.from_file(filename)
-                    normalized = audio.normalize()  # Simple normalization
-                    normalized = normalized + 4  # Slight boost
+                    normalized = audio.normalize() 
+                    normalized = normalized + 4 
                     
-                    # Use context manager to ensure file is closed
+                 
                     with normalized.export(
                         filename,
                         format=self.audio_config.format,
@@ -143,37 +143,36 @@ class PodcastMixer(BaseTool):
     ) -> str:
         if not audio_files:
             print("DEBUG: No audio files provided to mix.")
-            return "" # Return empty string instead of raising, so crewai can continue
+            return "" 
 
         try:
-            # Create output directory if it doesn't exist
+         
             os.makedirs(self.output_dir, exist_ok=True)
             print(f"DEBUG: Output directory confirmed: {self.output_dir}")
             
-            # --- IMPORTANT DEBUGGING ADDITION ---
-            # Verify if segment files exist before attempting to load them
+           
             validated_audio_files = []
             for af in audio_files:
-                # Construct an absolute path for checking, assuming segments are relative to CWD if not absolute
+               
                 segment_path = af if os.path.isabs(af) else os.path.join(os.getcwd(), af)
                 if not os.path.exists(segment_path):
                     print(f"ERROR: Segment file does not exist at path: {segment_path}. (Original received: {af})")
-                    return "" # If a segment is missing, mixing cannot proceed
+                    return ""
                 validated_audio_files.append(segment_path)
-            # --- END DEBUGGING ADDITION ---
+      
 
             mixed = AudioSegment.from_file(validated_audio_files[0])
             print(f"DEBUG: Initial segment loaded: {validated_audio_files[0]}")
 
             for i, audio_file in enumerate(validated_audio_files[1:]):
                 next_segment = AudioSegment.from_file(audio_file)
-                # Add silence and use crossfade
+     
                 silence = AudioSegment.silent(duration=200)
                 next_segment = silence + next_segment
                 mixed = mixed.append(next_segment, crossfade=crossfade)
                 print(f"DEBUG: Appended segment {i+2}: {audio_file}")
 
-            # Define the final output file path using the configured output_dir
+           
             output_file = os.path.join(self.output_dir, "podcast_final.mp3")
             print(f"DEBUG: Attempting to export to: {output_file}")
             
@@ -181,8 +180,8 @@ class PodcastMixer(BaseTool):
                 output_file,
                 format="mp3",
                 parameters=[
-                    "-q:a", "0",  # Highest quality
-                    "-ar", "48000"  # Professional sample rate
+                    "-q:a", "0", 
+                    "-ar", "48000" 
                 ]
             )
 
@@ -191,7 +190,7 @@ class PodcastMixer(BaseTool):
             return output_file
 
         except Exception as e:
-            # Print a prominent error message and the full traceback
+          
             print(f"CRITICAL ERROR IN PODCASTMIXER: {str(e)}")
-            traceback.print_exc() # This will show you exactly where the error occurred in the stack
+            traceback.print_exc() 
             return ""
