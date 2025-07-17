@@ -25,13 +25,12 @@ def setup_directories():
     
     return dirs
 
-# Load environment variables
+
 load_dotenv()
 
-# --- PDF Knowledge Source ---
 research_paper = PDFKnowledgeSource(file_paths="workplace-prod.pdf")
 
-# --- Pydantic Models definitions ---
+
 class PaperSummary(BaseModel):
     """Summary of a research paper."""
     title: str = Field(..., description="Title of the research paper")                   
@@ -59,17 +58,17 @@ class AudioGeneration(BaseModel):
 # --- LLM Setup ---
 
 summary_llm = LLM(
-    model="openai/gpt-4.1", # Changed from "openai/o1-preview"
+    model="openai/gpt-4.1",
     temperature=0.0,
 )
 
 script_llm = LLM(
-    model="openai/gpt-4.1-mini", # Changed from "openai/o1-preview", potentially a cost-effective alternative
+    model="openai/gpt-4.1-mini", 
     temperature=0.3,
 )
 
 script_enhancer_llm = LLM(
-    model="openai/gpt-4.1", # Changed from "anthropic/claude-3-5-sonnet-20241022"
+    model="openai/gpt-4.1",
     temperature=0.7,
 )
 audio_llm = LLM(
@@ -77,30 +76,30 @@ audio_llm = LLM(
     temperature=0.0,
 )
 
-# Create and configure tools
+
 dirs = setup_directories()
 audio_generator = PodcastAudioGenerator(output_dir=dirs['SEGMENTS'])
 
-# Julia: Enthusiastic expert
+
 audio_generator.add_voice(
     "Julia", 
     os.getenv("LAURA_VOICE_ID"),
     VoiceConfig(
-        stability=0.35,  # More variation for natural enthusiasm
-        similarity_boost=0.75,  # Maintain voice consistency
-        style=0.65,  # Good expressiveness without being over the top
+        stability=0.35, 
+        similarity_boost=0.75,  
+        style=0.65,  
         use_speaker_boost=True
     )
 )
 
-# Guido: Engaged and curious
+
 audio_generator.add_voice(
     "Guido", 
     os.getenv("LIAM_VOICE_ID"),
     VoiceConfig(
-        stability=0.4,  # Slightly more stable but still natural
+        stability=0.4,
         similarity_boost=0.75,
-        style=0.6,  # Balanced expressiveness
+        style=0.6, 
         use_speaker_boost=True
     )
 )
