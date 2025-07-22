@@ -3,6 +3,8 @@
 
 An automated podcast generation system using [CrewAI](https://crewai.com/) and [ElevenLabs](https://elevenlabs.io/). The system reads research papers and creates engaging, conversational podcasts with natural-sounding voices.
 
+You all can watch my video i uploaded on Youtube - (https://www.youtube.com/watch?v=H_OxQnuSmR0)
+
 
 Generated using AI agents for research analysis, script writing, and voice synthesis.
 
